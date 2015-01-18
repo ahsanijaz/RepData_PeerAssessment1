@@ -1,14 +1,9 @@
----
-title: 'Reproducible Research: Peer Assessment 1'
-output:
-  html_document:
-    keep_md: yes
-  pdf_document: default
----
+# Reproducible Research: Peer Assessment 1
 
 
 ## Loading and preprocessing the data
-```{r,echo= TRUE}
+
+```r
 library(ggplot2)
 library(plyr)
 library(lattice)
@@ -20,24 +15,34 @@ stepsData$interval<- as.factor(stepsData$interval)
 
 
 ## What is mean total number of steps taken per day?
-The mean number of steps taken each day is `r mean(stepsData$steps,na.rm = TRUE)` whereas the median is given as `r median(stepsData$steps,na.rm = TRUE)`.
-```{r,echo=TRUE}
+The mean number of steps taken each day is 37.3825996 whereas the median is given as 0.
+
+```r
 sumSteps <- tapply(stepsData$steps,stepsData$date,sum)
 hist(sumSteps,xlab = "",main ="Histogram of total of steps taken per day")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-2-1.png) 
+
 
 ## What is the average daily activity pattern?
-```{r,echo=TRUE}
+
+```r
 InterAve <- tapply(stepsData$steps,stepsData$interval,mean,na.rm = TRUE)
 plot(names(InterAve),InterAve,type = "l",main = "Average number of steps taken across day in intervals")
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
+
+```r
 maxIntervalNumber <- which.max(InterAve)
 ```
-On average across all the days in the dataset, interval `r names(which.max(InterAve))` contains the maximum number of steps.
+On average across all the days in the dataset, interval 835 contains the maximum number of steps.
 
 ## Imputing missing values
-The number of missing values are `r sum(is.na(stepsData$steps))`. Mean of five minute interval is used for imputing missing values in the data set as follows:
-```{r,echo=TRUE}
+The number of missing values are 2304. Mean of five minute interval is used for imputing missing values in the data set as follows:
+
+```r
 stepsNA <- stepsData[is.na(stepsData$steps),]
 facInter <- factor(stepsNA$interval)
 stepImputed<- stepsData
@@ -46,13 +51,22 @@ for(i in 1:length(facInter)){
 }
 sumStepsIm <- tapply(stepImputed$steps,stepImputed$date,sum)
 hist(sumStepsIm,xlab = "",main ="Histogram of total number of steps per day with imputed data")
-
 ```
-The mean number of steps taken each day after imputation is `r mean(stepImputed$steps,na.rm = TRUE)` as compared to previous mean given as `r mean(stepsData$steps,na.rm = TRUE)`. The new median after imputation is  `r median(stepImputed$steps,na.rm = TRUE)` whereas the previous median was given as `r median(stepsData$steps,na.rm = TRUE)`. I don't get why they are equal. I've checked the code and imputations and everything seems correct. 
+
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png) 
+The mean number of steps taken each day after imputation is 37.3825996 as compared to previous mean given as 37.3825996. The new median after imputation is  0 whereas the previous median was given as 0. I don't get why they are equal. I've checked the code and imputations and everything seems correct. 
 
 ## Are there differences in activity patterns between weekdays and weekends?
-```{r,echo=TRUE}
+
+```r
 Sys.setlocale("LC_TIME","C")
+```
+
+```
+## [1] "C"
+```
+
+```r
 weekend <- (weekdays(stepImputed$date)== "Sunday" | weekdays(stepImputed$date)== "Saturday")
 
 weekendData  <- stepImputed[weekend,]
@@ -65,7 +79,8 @@ InterAveNWk <- ddply(weekdaysDat,"interval",function(x){data.frame(meanStep = me
 newDat <- rbind.data.frame(InterAveNWk,InterAveWk)
 newDat$dayType <- as.factor(newDat$dayType)
 xyplot(meanStep~interval|dayType,data = newDat,type = "l",ylab = "Number of steps")
-
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-5-1.png) 
 
 As can be seen from the plot above, there is overall more activity on the weekend. But the spike of steps taken is on weekdays probably due to work timings kicking in at the start of morning.
